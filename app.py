@@ -4,12 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 secret_key = os.getenv("SECRET_KEY")
-port = int(os.environ.get('PORT', 5000))
 
 
 app = Flask(__name__)
 
-app.run(host='0.0.0.0', port=port)
 
 albums=[]
 with open('files/top_500.csv', newline='', encoding='utf-8-sig') as csvfile:
@@ -77,3 +75,5 @@ def random_album():
 
 if __name__ == '__main__':
     app.run(debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
