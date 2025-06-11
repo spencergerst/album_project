@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 secret_key = os.getenv("SECRET_KEY")
+port = int(os.environ.get('PORT', 5000))
+
+app.run(host='0.0.0.0', port=port)
 
 
 app = Flask(__name__)
