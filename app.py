@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, abort, redirect, url_for
-import csv, random
+import csv, random, os
 from dotenv import load_dotenv
 
 load_dotenv()
+secret_key = os.getenv("SECRET_KEY")
 
 
 app = Flask(__name__)
