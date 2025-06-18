@@ -8,11 +8,6 @@ SECRET_PASS = os.getenv("ADMIN_PASSWORD")
 
 app = Flask(__name__)
 
-def init_db():
-    with sqlite3.connect('sql/database.db') as conn:
-        with open('sql/albums.sql', 'r') as f:
-            conn.executescript(f.read())
-
 albums=[]
 with open('files/top_500.csv', newline='', encoding='utf-8-sig') as csvfile:
     reader = csv.DictReader(csvfile)
