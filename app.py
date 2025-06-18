@@ -27,7 +27,7 @@ def get_albums():
     conn = sqlite3.connect('sql/database.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute('SELECT * FROM albums ORDER BY position ASC')
+    cursor.execute('SELECT * FROM albums ORDER BY rating DESC')
     albums = cursor.fetchall()
     conn.close()
     return albums
@@ -78,12 +78,24 @@ def random_album():
     random_album = random.randint(1, 500)
     return redirect(url_for('album_detail', album_pos=random_album, source=source, page=page))
 
+def update_pos():
+    conn = sqlite3.connect("sql/database.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM albums WHERE rating IS NOT NULL ORDER BY rating DESC")
+    ranked_order = cursor.fetchall()
+
+    for new_position, (album_id,) in enumerate(ranked_order, start=1):
+        cursor.execute("UPDATE albums SET position = ? WHERE id = ?", (new_position, album_id))
+
+    conn.commit()
+    conn.close()
+
 @app.route('/admin-add-review', methods = ['GET', 'POST'])
 def admin_add_review():
     if request.method == 'POST':
         if request.form.get('password') != SECRET_PASS:
             return "Unauthorized", 403
-        position = request.form.get('position') or None
         artist = request.form.get('artist')
         album = request.form.get('album')
         year = request.form.get('year') or None
@@ -95,12 +107,13 @@ def admin_add_review():
         cursor = conn.cursor()
 
         cursor.execute('''
-            INSERT INTO albums (position, artist, album, year, genres, rating, review)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (position, artist, album, year, genres, rating, review))
+            INSERT INTO albums (artist, album, year, genres, rating, review)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (artist, album, year, genres, rating, review))
 
         conn.commit()
         conn.close()
+        update_pos()
         return redirect(url_for('index'))
     else:
         return render_template('admin_add_review.html')
