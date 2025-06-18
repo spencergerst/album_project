@@ -1,13 +1,17 @@
 from flask import Flask, render_template, request, abort, redirect, url_for
-import csv, random, os
+import csv, random, os, sqlite3
 from dotenv import load_dotenv
 
 load_dotenv()
 secret_key = os.getenv("SECRET_KEY")
-
+SECRET_PASS = os.getenv("ADMIN_PASSWORD")
 
 app = Flask(__name__)
 
+def init_db():
+    with sqlite3.connect('sql/database.db') as conn:
+        with open('sql/albums.sql', 'r') as f:
+            conn.executescript(f.read())
 
 albums=[]
 with open('files/top_500.csv', newline='', encoding='utf-8-sig') as csvfile:
@@ -19,15 +23,14 @@ with open('files/top_500.csv', newline='', encoding='utf-8-sig') as csvfile:
         row["num_ratings"] = int(row["num_ratings"])
         albums.append(row)
 
-my_albums=[]
-with open('files/my_top_500.csv', newline='', encoding='utf-8-sig') as csvfile:
-    my_album_reader = csv.DictReader(csvfile)
-    for row in my_album_reader:
-        row["position"] = int(row["position"])
-        row["date"] = int(row["date"])
-        row["rating"] = float(row["rating"])
-        row["num_ratings"] = int(row["num_ratings"])
-        my_albums.append(row)
+def get_albums():
+    conn = sqlite3.connect('sql/database.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM albums ORDER BY position ASC')
+    albums = cursor.fetchall()
+    conn.close()
+    return albums
 
 @app.route('/')
 def index():
@@ -40,6 +43,7 @@ def index():
 
 @app.route('/MyTop500.html')
 def my_top_500():
+    my_albums = get_albums()
     per_page = 100
     page = int(request.args.get('page', 1))
     first_album = (page-1) * 100
@@ -59,6 +63,7 @@ def album_detail(album_pos):
 
 @app.route('/my_album/<int:album_pos>')
 def my_album_detail(album_pos):
+    my_albums = get_albums()
     page = request.args.get('page', 1, type=int)
     source = request.args.get('source', 'my')
     album = next((a for a in my_albums if a["position"] == album_pos), None)
@@ -72,6 +77,33 @@ def random_album():
     page = request.args.get('page', 1, type=int)
     random_album = random.randint(1, 500)
     return redirect(url_for('album_detail', album_pos=random_album, source=source, page=page))
+
+@app.route('/admin-add-review', methods = ['GET', 'POST'])
+def admin_add_review():
+    if request.method == 'POST':
+        if request.form.get('password') != SECRET_PASS:
+            return "Unauthorized", 403
+        position = request.form.get('position') or None
+        artist = request.form.get('artist')
+        album = request.form.get('album')
+        year = request.form.get('year') or None
+        genres = request.form.get('genres')
+        rating = request.form.get('rating') or None
+        review = request.form.get('review')
+
+        conn = sqlite3.connect('sql/database.db')
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            INSERT INTO albums (position, artist, album, year, genres, rating, review)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (position, artist, album, year, genres, rating, review))
+
+        conn.commit()
+        conn.close()
+        return redirect(url_for('index'))
+    else:
+        return render_template('admin_add_review.html')
 
 if __name__ == '__main__':
     app.run(debug=False)

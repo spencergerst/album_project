@@ -85,7 +85,7 @@
       <div class="col">
         <div class="album-card">
           <a href="{{ url_for('album_detail', album_pos=album['position'], page=page, source='rym') }}">
-            <img src="{{ url_for('static', filename='album_covers/album_covers-' ~ album.position ~ '_' ~ album.artist|replace('/', '-') ~ '_' ~ album.name|replace('?', '')|replace('/', '-')|replace(':', '') ~ '.jpg') }}"
+            <img src="{{ url_for('static', filename='album_covers/album_covers_' ~ album.artist|replace('/', '-') ~ '_' ~ album.name|replace('?', '')|replace('/', '-')|replace(':', '') ~ '.jpg') }}"
                 alt="{{ album.name }} cover"
                 class="album-cover">
           </a>

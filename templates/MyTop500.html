@@ -85,12 +85,12 @@
       <div class="col">
         <div class="album-card">
           <a href="{{ url_for('my_album_detail', album_pos=album['position'], page=page) }}" class="album-link">
-            <img src="{{ url_for('static', filename='album_covers/album_covers-' ~ album.position ~ '_' ~ album.artist|replace('/', '-') ~ '_' ~ album.name|replace('?', '')|replace('/', '-')|replace(':', '') ~ '.jpg') }}"
-                alt="{{ album.name }} cover"
+            <img src="{{ url_for('static', filename='album_covers/album_covers_' ~ album.artist|replace('/', '-') ~ '_' ~ album.album|replace('?', '')|replace('/', '-')|replace(':', '') ~ '.jpg') }}"
+                alt="{{ album.album }} cover"
                 class="album-cover">
           </a>
           <div class="album-title">
-            {{ album['position'] }}. {{ album['artist'] }} – {{ album['name'] }}
+            {{ album['position'] }}. {{ album['artist'] }} – {{ album['album'] }}
           </div>
         </div>
       </div>

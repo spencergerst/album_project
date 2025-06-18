@@ -52,7 +52,7 @@
 <body>
 
 <div class="container album-container">
-  <img src="{{ url_for('static', filename='album_covers/album_covers-' ~ album.position ~ '_' ~ album.artist|replace('/', '-') ~ '_' ~ album.name|replace('?', '')|replace('/', '-')|replace(':', '') ~ '.jpg') }}"
+  <img src="{{ url_for('static', filename='album_covers/album_covers_' ~ album.artist|replace('/', '-') ~ '_' ~ album.name|replace('?', '')|replace('/', '-')|replace(':', '') ~ '.jpg') }}"
        alt="{{ album.name }} cover"
        class="album-cover">
 
